@@ -1,3 +1,9 @@
+// sounds
+const coinSound = new Audio("sounds/coin.mp3");
+const hitSound = new Audio("sounds/hit.mp3");
+const bgm = new Audio("sounds/bgm.mp3");
+bgm.loop = true;
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -57,12 +63,17 @@ function update() {
     if (!coin.collected && isColliding(player, coin)) {
       coin.collected = true;
       score += 10;
+      bgm.volume = 0.1;
+      coinSound.play();
     }
   }
 
   // player collides with enemy = lose
   if (isColliding(player, enemy)) {
     gameOver = true;
+    hitSound.play();
+    bgm.volume = 0.1;
+    bgm.pause();
   }
 }
 
@@ -110,6 +121,14 @@ function draw() {
 }
 
 function gameLoop() {
+  document.addEventListener(
+    "keydown",
+    () => {
+      bgm.play();
+    },
+    { once: true }
+  );
+
   if (!gameOver) {
     update();
     draw();
