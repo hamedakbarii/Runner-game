@@ -7,6 +7,8 @@ bgm.loop = true;
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const restartBtn = document.getElementById("restartBtn");
+
 const player = {
   x: 50,
   y: 50,
@@ -74,6 +76,7 @@ function update() {
     hitSound.play();
     bgm.volume = 0.1;
     bgm.pause();
+    restartBtn.style.display = "block";
   }
 }
 
@@ -137,5 +140,26 @@ function gameLoop() {
     draw(); // show the last state
   }
 }
+
+// Restart The Game
+restartBtn.addEventListener("click", () => {
+  // ریست وضعیت بازی
+  player.x = 50;
+  player.y = 50;
+  score = 0;
+  gameOver = false;
+
+  coins.forEach((coin) => {
+    coin.x = Math.random() * 750 + 25;
+    coin.y = Math.random() * 550 + 25;
+    coin.collected = false;
+  });
+
+  enemy.x = 700;
+  enemy.y = 100;
+
+  restartBtn.style.display = "none";
+  gameLoop();
+});
 
 gameLoop();
