@@ -127,6 +127,7 @@ function update() {
     hitSound.play();
     bgm.volume = 0.1;
     bgm.pause();
+    saveHighScore();
     restartBtn.style.display = "block";
   }
 }
@@ -160,15 +161,27 @@ function draw() {
 
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
-  ctx.fillText("Score: " + score, 10, 25);
+  ctx.textAlign = "right";
+  ctx.fillText("Time: " + timeLeft, GAME_WIDTH - 10, 25);
 
   if (gameOver) {
     ctx.fillStyle = "white";
-    ctx.font = "40px Tahoma";
+    ctx.font = "40px Arial";
     ctx.textAlign = "center";
-    ctx.fillText("You Lose! 🙃", GAME_WIDTH / 2, GAME_HEIGHT / 2);
+    ctx.fillText("Game Over!", GAME_WIDTH / 2, GAME_HEIGHT / 2);
+    ctx.fillText("Score: " + score, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 50);
+    ctx.fillText(
+      "High Score: " + highScore,
+      GAME_WIDTH / 2,
+      GAME_HEIGHT / 2 + 100
+    );
     ctx.textAlign = "left";
   }
+
+  ctx.fillStyle = "yellow";
+  ctx.font = "20px Arial";
+  ctx.textAlign = "left";
+  ctx.fillText("High Score: " + highScore, 10, 50);
 }
 
 function gameLoop() {
@@ -186,6 +199,33 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
   } else {
     draw();
+  }
+}
+
+let timeLeft = 30;
+let timerInterval;
+
+function startGame() {
+  timeLeft = 30;
+  score = 0;
+  gameOver = false;
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      gameOver = true;
+      clearInterval(timerInterval);
+      saveHighScore();
+    }
+  }, 1000);
+}
+
+let highScore = localStorage.getItem("highScore") || 0;
+
+function saveHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem("highScore", highScore);
   }
 }
 
