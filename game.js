@@ -45,10 +45,10 @@ window.addEventListener("deviceorientation", (e) => {
   if (e.gamma < -10) keys["ArrowLeft"] = true; // tilted left
   else keys["ArrowLeft"] = false;
 
-  if (e.beta > 10) keys["ArrowDown"] = true; // tilted forward
+  if (e.beta > 10) keys["ArrowDown"] = true; // به جلو خم شده
   else keys["ArrowDown"] = false;
 
-  if (e.beta < -10) keys["ArrowUp"] = true; // tilted backward
+  if (e.beta < -10) keys["ArrowUp"] = true; // به عقب خم شده
   else keys["ArrowUp"] = false;
 });
 
@@ -111,6 +111,14 @@ function update() {
       score += 10;
       bgm.volume = 0.1;
       coinSound.play();
+
+      coins.push({
+        x: Math.random() * (GAME_WIDTH - 50) + 25,
+        y: Math.random() * (GAME_HEIGHT - 50) + 25,
+        size: 15,
+        color: "gold",
+        collected: false,
+      });
     }
   }
 
@@ -159,6 +167,7 @@ function draw() {
     ctx.font = "40px Tahoma";
     ctx.textAlign = "center";
     ctx.fillText("You Lose! 🙃", GAME_WIDTH / 2, GAME_HEIGHT / 2);
+    ctx.textAlign = "left";
   }
 }
 
