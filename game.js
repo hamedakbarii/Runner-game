@@ -9,6 +9,53 @@ const ctx = canvas.getContext("2d");
 
 const restartBtn = document.getElementById("restartBtn");
 
+// touch controls
+document
+  .getElementById("up")
+  .addEventListener("touchstart", () => (keys["ArrowUp"] = true));
+document
+  .getElementById("up")
+  .addEventListener("touchend", () => (keys["ArrowUp"] = false));
+
+document
+  .getElementById("down")
+  .addEventListener("touchstart", () => (keys["ArrowDown"] = true));
+document
+  .getElementById("down")
+  .addEventListener("touchend", () => (keys["ArrowDown"] = false));
+
+document
+  .getElementById("left")
+  .addEventListener("touchstart", () => (keys["ArrowLeft"] = true));
+document
+  .getElementById("left")
+  .addEventListener("touchend", () => (keys["ArrowLeft"] = false));
+
+document
+  .getElementById("right")
+  .addEventListener("touchstart", () => (keys["ArrowRight"] = true));
+document
+  .getElementById("right")
+  .addEventListener("touchend", () => (keys["ArrowRight"] = false));
+
+window.addEventListener("deviceorientation", (e) => {
+  if (e.gamma > 10) keys["ArrowRight"] = true; // tilted right
+  else keys["ArrowRight"] = false;
+
+  if (e.gamma < -10) keys["ArrowLeft"] = true; // tilted left
+  else keys["ArrowLeft"] = false;
+
+  if (e.beta > 10) keys["ArrowDown"] = true; // tilted forward
+  else keys["ArrowDown"] = false;
+
+  if (e.beta < -10) keys["ArrowUp"] = true; // tilted backward
+  else keys["ArrowUp"] = false;
+});
+
+// Game Dimensions
+const GAME_WIDTH = 800;
+const GAME_HEIGHT = 600;
+
 const player = {
   x: 50,
   y: 50,
@@ -20,8 +67,8 @@ const player = {
 const coins = [];
 for (let i = 0; i < 5; i++) {
   coins.push({
-    x: Math.random() * 750 + 25,
-    y: Math.random() * 550 + 25,
+    x: Math.random() * (GAME_WIDTH - 50) + 25,
+    y: Math.random() * (GAME_HEIGHT - 50) + 25,
     size: 15,
     color: "gold",
     collected: false,
@@ -49,18 +96,15 @@ function update() {
   if (keys["ArrowLeft"]) player.x -= player.speed;
   if (keys["ArrowRight"]) player.x += player.speed;
 
-  // limit the player to the canvas
-  player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-  player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+  player.x = Math.max(0, Math.min(GAME_WIDTH - player.size, player.x));
+  player.y = Math.max(0, Math.min(GAME_HEIGHT - player.size, player.y));
 
-  // move the enemy towards the player
   const dx = player.x - enemy.x;
   const dy = player.y - enemy.y;
   const dist = Math.hypot(dx, dy);
   enemy.x += (dx / dist) * enemy.speed;
   enemy.y += (dy / dist) * enemy.speed;
 
-  // player collides with coins
   for (let coin of coins) {
     if (!coin.collected && isColliding(player, coin)) {
       coin.collected = true;
@@ -70,7 +114,6 @@ function update() {
     }
   }
 
-  // player collides with enemy = lose
   if (isColliding(player, enemy)) {
     gameOver = true;
     hitSound.play();
@@ -90,13 +133,11 @@ function isColliding(a, b) {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-  // player
   ctx.fillStyle = player.color;
   ctx.fillRect(player.x, player.y, player.size, player.size);
 
-  // coins
   for (let coin of coins) {
     if (!coin.collected) {
       ctx.fillStyle = coin.color;
@@ -106,20 +147,18 @@ function draw() {
     }
   }
 
-  // enemy
   ctx.fillStyle = enemy.color;
   ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
 
-  // score
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
   ctx.fillText("Score: " + score, 10, 25);
 
-  // lose
   if (gameOver) {
     ctx.fillStyle = "white";
     ctx.font = "40px Tahoma";
-    ctx.fillText("You Lose! 🙃", 300, 300);
+    ctx.textAlign = "center";
+    ctx.fillText("You Lose! 🙃", GAME_WIDTH / 2, GAME_HEIGHT / 2);
   }
 }
 
@@ -137,26 +176,24 @@ function gameLoop() {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
-    draw(); // show the last state
+    draw();
   }
 }
 
-// Restart The Game
 restartBtn.addEventListener("click", () => {
-  // ریست وضعیت بازی
-  player.x = 50;
-  player.y = 50;
+  player.x = GAME_WIDTH * 0.05;
+  player.y = GAME_HEIGHT * 0.05;
   score = 0;
   gameOver = false;
 
   coins.forEach((coin) => {
-    coin.x = Math.random() * 750 + 25;
-    coin.y = Math.random() * 550 + 25;
+    coin.x = Math.random() * (GAME_WIDTH - 50) + 25;
+    coin.y = Math.random() * (GAME_HEIGHT - 50) + 25;
     coin.collected = false;
   });
 
-  enemy.x = 700;
-  enemy.y = 100;
+  enemy.x = GAME_WIDTH * 0.85;
+  enemy.y = GAME_HEIGHT * 0.15;
 
   restartBtn.style.display = "none";
   gameLoop();

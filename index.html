@@ -3,14 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Runner Game</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="game-container">
+      <h1 id="title">Runner Game</h1>
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      <button id="restartBtn" style="display: none">Restart</button>
 
-    <button id="restartBtn" style="display: none">Restart</button>
-
+      <div id="controls">
+        <button id="up">⬆️</button>
+        <div>
+          <button id="left">⬅️</button>
+          <button id="down">⬇️</button>
+          <button id="right">➡️</button>
+        </div>
+      </div>
+    </div>
     <script src="game.js"></script>
   </body>
 </html>

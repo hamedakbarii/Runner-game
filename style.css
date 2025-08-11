@@ -9,14 +9,17 @@ body {
 }
 
 canvas {
+  display: block;
+  margin: 0 auto;
+  background: #111;
   border: 2px solid #fff;
-  background: #222;
 }
 
 #restartBtn {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 10px 20px;
   font-size: 18px;
   background: limegreen;
@@ -28,4 +31,29 @@ canvas {
 
 #restartBtn:hover {
   background: green;
+}
+
+#title {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  color: white;
+}
+
+#controls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  user-select: none;
+}
+
+#controls button {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  padding: 20px;
+  margin: 5px;
+  border-radius: 10px;
+  font-size: 24px;
 }
