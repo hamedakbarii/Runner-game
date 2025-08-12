@@ -9,88 +9,65 @@ const ctx = canvas.getContext("2d");
 
 const restartBtn = document.getElementById("restartBtn");
 
-// touch controls
-document
-  .getElementById("up")
-  .addEventListener("touchstart", () => (keys["ArrowUp"] = true));
-document
-  .getElementById("up")
-  .addEventListener("touchend", () => (keys["ArrowUp"] = false));
-
-document
-  .getElementById("down")
-  .addEventListener("touchstart", () => (keys["ArrowDown"] = true));
-document
-  .getElementById("down")
-  .addEventListener("touchend", () => (keys["ArrowDown"] = false));
-
-document
-  .getElementById("left")
-  .addEventListener("touchstart", () => (keys["ArrowLeft"] = true));
-document
-  .getElementById("left")
-  .addEventListener("touchend", () => (keys["ArrowLeft"] = false));
-
-document
-  .getElementById("right")
-  .addEventListener("touchstart", () => (keys["ArrowRight"] = true));
-document
-  .getElementById("right")
-  .addEventListener("touchend", () => (keys["ArrowRight"] = false));
-
-window.addEventListener("deviceorientation", (e) => {
-  if (e.gamma > 10) keys["ArrowRight"] = true; // tilted right
-  else keys["ArrowRight"] = false;
-
-  if (e.gamma < -10) keys["ArrowLeft"] = true; // tilted left
-  else keys["ArrowLeft"] = false;
-
-  if (e.beta > 10) keys["ArrowDown"] = true; // به جلو خم شده
-  else keys["ArrowDown"] = false;
-
-  if (e.beta < -10) keys["ArrowUp"] = true; // به عقب خم شده
-  else keys["ArrowUp"] = false;
-});
+let keys = {};
+let score = 0;
+let gameOver = false;
+let timeLeft = 30;
+let timerInterval;
+let highScore = localStorage.getItem("highScore") || 0;
 
 // Game Dimensions
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 
-const player = {
-  x: 50,
-  y: 50,
-  size: 30,
-  color: "lime",
-  speed: 4,
-};
+const player = { x: 50, y: 50, size: 30, color: "lime", speed: 4 };
+const enemy = { x: 700, y: 100, size: 30, color: "red", speed: 2 };
 
 const coins = [];
-for (let i = 0; i < 5; i++) {
-  coins.push({
-    x: Math.random() * (GAME_WIDTH - 50) + 25,
-    y: Math.random() * (GAME_HEIGHT - 50) + 25,
-    size: 15,
-    color: "gold",
-    collected: false,
-  });
+function spawnCoins(n) {
+  coins.length = 0;
+  for (let i = 0; i < n; i++) {
+    coins.push({
+      x: Math.random() * (GAME_WIDTH - 50) + 25,
+      y: Math.random() * (GAME_HEIGHT - 50) + 25,
+      size: 15,
+      color: "gold",
+      collected: false,
+    });
+  }
 }
+spawnCoins(5);
 
-const enemy = {
-  x: 700,
-  y: 100,
-  size: 30,
-  color: "red",
-  speed: 2,
-};
-
-let keys = {};
-let score = 0;
-let gameOver = false;
-
+// Keyboard controls
 document.addEventListener("keydown", (e) => (keys[e.key] = true));
 document.addEventListener("keyup", (e) => (keys[e.key] = false));
 
+// Touch controls
+["up", "down", "left", "right"].forEach((dir) => {
+  document
+    .getElementById(dir)
+    .addEventListener(
+      "touchstart",
+      () => (keys[`Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`] = true)
+    );
+  document
+    .getElementById(dir)
+    .addEventListener(
+      "touchend",
+      () => (keys[`Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`] = false)
+    );
+});
+
+// Gyro controls
+window.addEventListener("deviceorientation", (e) => {
+  keys["ArrowRight"] = e.gamma > 10;
+  keys["ArrowLeft"] = e.gamma < -10;
+  keys["ArrowDown"] = e.beta > 10;
+  keys["ArrowUp"] = e.beta < -10;
+});
+
 function update() {
+  // Move player
   if (keys["ArrowUp"]) player.y -= player.speed;
   if (keys["ArrowDown"]) player.y += player.speed;
   if (keys["ArrowLeft"]) player.x -= player.speed;
@@ -99,19 +76,19 @@ function update() {
   player.x = Math.max(0, Math.min(GAME_WIDTH - player.size, player.x));
   player.y = Math.max(0, Math.min(GAME_HEIGHT - player.size, player.y));
 
+  // Enemy follows player
   const dx = player.x - enemy.x;
   const dy = player.y - enemy.y;
   const dist = Math.hypot(dx, dy);
   enemy.x += (dx / dist) * enemy.speed;
   enemy.y += (dy / dist) * enemy.speed;
 
+  // Coin collection
   for (let coin of coins) {
     if (!coin.collected && isColliding(player, coin)) {
       coin.collected = true;
       score += 10;
-      bgm.volume = 0.1;
       coinSound.play();
-
       coins.push({
         x: Math.random() * (GAME_WIDTH - 50) + 25,
         y: Math.random() * (GAME_HEIGHT - 50) + 25,
@@ -122,13 +99,9 @@ function update() {
     }
   }
 
+  // Collision with enemy
   if (isColliding(player, enemy)) {
-    gameOver = true;
-    hitSound.play();
-    bgm.volume = 0.1;
-    bgm.pause();
-    saveHighScore();
-    restartBtn.style.display = "block";
+    endGame();
   }
 }
 
@@ -144,9 +117,11 @@ function isColliding(a, b) {
 function draw() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
+  // Player
   ctx.fillStyle = player.color;
   ctx.fillRect(player.x, player.y, player.size, player.size);
 
+  // Coins
   for (let coin of coins) {
     if (!coin.collected) {
       ctx.fillStyle = coin.color;
@@ -156,11 +131,17 @@ function draw() {
     }
   }
 
+  // Enemy
   ctx.fillStyle = enemy.color;
   ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
 
+  // HUD
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
+  ctx.textAlign = "left";
+  ctx.fillText("Score: " + score, 10, 25);
+  ctx.fillText("High Score: " + highScore, 10, 50);
+
   ctx.textAlign = "right";
   ctx.fillText("Time: " + timeLeft, GAME_WIDTH - 10, 25);
 
@@ -175,24 +156,10 @@ function draw() {
       GAME_WIDTH / 2,
       GAME_HEIGHT / 2 + 100
     );
-    ctx.textAlign = "left";
   }
-
-  ctx.fillStyle = "yellow";
-  ctx.font = "20px Arial";
-  ctx.textAlign = "left";
-  ctx.fillText("High Score: " + highScore, 10, 50);
 }
 
 function gameLoop() {
-  document.addEventListener(
-    "keydown",
-    () => {
-      bgm.play();
-    },
-    { once: true }
-  );
-
   if (!gameOver) {
     update();
     draw();
@@ -202,50 +169,50 @@ function gameLoop() {
   }
 }
 
-let timeLeft = 30;
-let timerInterval;
-
 function startGame() {
-  timeLeft = 30;
   score = 0;
+  timeLeft = 30;
   gameOver = false;
+  spawnCoins(5);
+  player.x = 50;
+  player.y = 50;
+  enemy.x = 700;
+  enemy.y = 100;
+  restartBtn.style.display = "none";
 
+  bgm.currentTime = 0;
+  bgm.play();
+
+  clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     timeLeft--;
     if (timeLeft <= 0) {
-      gameOver = true;
-      clearInterval(timerInterval);
-      saveHighScore();
+      endGame();
     }
   }, 1000);
+
+  gameLoop();
 }
 
-let highScore = localStorage.getItem("highScore") || 0;
-
-function saveHighScore() {
+function endGame() {
+  gameOver = true;
+  clearInterval(timerInterval);
   if (score > highScore) {
     highScore = score;
     localStorage.setItem("highScore", highScore);
   }
+  bgm.pause();
+  hitSound.play();
+  restartBtn.style.display = "block";
 }
 
-restartBtn.addEventListener("click", () => {
-  player.x = GAME_WIDTH * 0.05;
-  player.y = GAME_HEIGHT * 0.05;
-  score = 0;
-  gameOver = false;
+restartBtn.addEventListener("click", startGame);
 
-  coins.forEach((coin) => {
-    coin.x = Math.random() * (GAME_WIDTH - 50) + 25;
-    coin.y = Math.random() * (GAME_HEIGHT - 50) + 25;
-    coin.collected = false;
-  });
-
-  enemy.x = GAME_WIDTH * 0.85;
-  enemy.y = GAME_HEIGHT * 0.15;
-
-  restartBtn.style.display = "none";
-  gameLoop();
-});
-
-gameLoop();
+// Start game on first key press
+document.addEventListener(
+  "keydown",
+  () => {
+    startGame();
+  },
+  { once: true }
+);
