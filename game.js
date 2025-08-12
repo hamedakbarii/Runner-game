@@ -160,6 +160,8 @@ function draw() {
 }
 
 function gameLoop() {
+  bgm.play();
+
   if (!gameOver) {
     update();
     draw();
@@ -170,6 +172,8 @@ function gameLoop() {
 }
 
 function startGame() {
+  bgm.play();
+
   score = 0;
   timeLeft = 30;
   gameOver = false;
@@ -181,7 +185,6 @@ function startGame() {
   restartBtn.style.display = "none";
 
   bgm.currentTime = 0;
-  bgm.play();
 
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
@@ -208,11 +211,4 @@ function endGame() {
 
 restartBtn.addEventListener("click", startGame);
 
-// Start game on first key press
-document.addEventListener(
-  "keydown",
-  () => {
-    startGame();
-  },
-  { once: true }
-);
+startGame();
