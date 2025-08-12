@@ -83,12 +83,17 @@ function update() {
   enemy.x += (dx / dist) * enemy.speed;
   enemy.y += (dy / dist) * enemy.speed;
 
-  // Coin collection
+  // Coin collectionß
+  function playCoinSound() {
+    const sound = coinSound.cloneNode();
+    sound.play();
+  }
+
   for (let coin of coins) {
     if (!coin.collected && isColliding(player, coin)) {
       coin.collected = true;
       score += 10;
-      coinSound.play();
+      playCoinSound();
       coins.push({
         x: Math.random() * (GAME_WIDTH - 50) + 25,
         y: Math.random() * (GAME_HEIGHT - 50) + 25,
