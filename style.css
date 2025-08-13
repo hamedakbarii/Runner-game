@@ -15,6 +15,14 @@ canvas {
   border: 2px solid #fff;
 }
 
+@media (max-width: 768px) {
+  #gameCanvas {
+    width: 95vw; /* یا مثلاً 100% */
+    height: auto; /* نسبت اصلی رو حفظ می‌کنه */
+    max-height: 80vh; /* از صفحه بیرون نزنه */
+  }
+}
+
 #restartBtn {
   position: absolute;
   top: 100px;
@@ -43,6 +51,7 @@ canvas {
 }
 
 #controls {
+  width: 100%;
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -63,4 +72,14 @@ canvas {
   border-radius: 10px;
   font-size: 24px;
   width: 70px;
+}
+
+#controls {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  #controls {
+    display: flex; /* یا grid یا هرچی که داری */
+  }
 }
