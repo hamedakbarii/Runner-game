@@ -17,9 +17,9 @@ canvas {
 
 @media (max-width: 768px) {
   #gameCanvas {
-    width: 95vw; /* یا مثلاً 100% */
-    height: auto; /* نسبت اصلی رو حفظ می‌کنه */
-    max-height: 80vh; /* از صفحه بیرون نزنه */
+    width: 95vw;
+    height: auto;
+    max-height: 80vh;
   }
 }
 
@@ -65,6 +65,7 @@ canvas {
 }
 
 #controls button {
+  user-select: none;
   background: rgba(255, 255, 255, 0.3);
   border: none;
   padding: 20px;
