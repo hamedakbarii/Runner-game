@@ -118,9 +118,34 @@ function isColliding(a, b) {
     a.y + a.size > b.y
   );
 }
+const stars = Array.from({ length: 100 }, () => ({
+  x: Math.random() * GAME_WIDTH,
+  y: Math.random() * GAME_HEIGHT,
+  size: Math.random() * 2,
+  speed: Math.random() * 1 + 0.5,
+}));
+
+function drawBackground() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+  ctx.fillStyle = "white";
+  stars.forEach((star) => {
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    star.y += star.speed;
+    if (star.y > GAME_HEIGHT) {
+      star.y = 0;
+      star.x = Math.random() * GAME_WIDTH;
+    }
+  });
+}
 
 function draw() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  drawBackground();
 
   // Player
   ctx.fillStyle = player.color;
