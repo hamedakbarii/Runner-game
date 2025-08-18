@@ -20,9 +20,11 @@ let highScore = localStorage.getItem("highScore") || 0;
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 
-const player = { x: 50, y: 50, size: 30, color: "lime", speed: 4 };
-const enemy = { x: 700, y: 100, size: 30, color: "red", speed: 2 };
+// Characters
+const player = { x: 50, y: 50, width: 40, height: 40, speed: 4 };
+const enemy = { x: 700, y: 100, width: 40, height: 40, speed: 2 };
 
+// Coins
 const coins = [];
 function spawnCoins(n) {
   coins.length = 0;
@@ -66,6 +68,7 @@ window.addEventListener("deviceorientation", (e) => {
   keys["ArrowUp"] = e.beta < -10;
 });
 
+// Update game logic
 function update() {
   // Move player
   if (keys["ArrowUp"]) player.y -= player.speed;
@@ -73,8 +76,8 @@ function update() {
   if (keys["ArrowLeft"]) player.x -= player.speed;
   if (keys["ArrowRight"]) player.x += player.speed;
 
-  player.x = Math.max(0, Math.min(GAME_WIDTH - player.size, player.x));
-  player.y = Math.max(0, Math.min(GAME_HEIGHT - player.size, player.y));
+  player.x = Math.max(0, Math.min(GAME_WIDTH - player.width, player.x));
+  player.y = Math.max(0, Math.min(GAME_HEIGHT - player.height, player.y));
 
   // Enemy follows player
   const dx = player.x - enemy.x;
@@ -83,7 +86,7 @@ function update() {
   enemy.x += (dx / dist) * enemy.speed;
   enemy.y += (dy / dist) * enemy.speed;
 
-  // Coin collectionß
+  // Coin collection
   function playCoinSound() {
     const sound = coinSound.cloneNode();
     sound.play();
@@ -110,14 +113,17 @@ function update() {
   }
 }
 
+// Collision detection
 function isColliding(a, b) {
-  return (
-    a.x < b.x + b.size &&
-    a.x + a.size > b.x &&
-    a.y < b.y + b.size &&
-    a.y + a.size > b.y
-  );
+  const aW = a.width || a.size;
+  const aH = a.height || a.size;
+  const bW = b.width || b.size;
+  const bH = b.height || b.size;
+
+  return a.x < b.x + bW && a.x + aW > b.x && a.y < b.y + bH && a.y + aH > b.y;
 }
+
+// stars background
 const stars = Array.from({ length: 100 }, () => ({
   x: Math.random() * GAME_WIDTH,
   y: Math.random() * GAME_HEIGHT,
@@ -143,13 +149,17 @@ function drawBackground() {
   });
 }
 
+// Images
+const playerImg = new Image();
+playerImg.src = "./images/player.png";
+
+const enemyImg = new Image();
+enemyImg.src = "./images/enemy.png";
+
+// Draw everything
 function draw() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   drawBackground();
-
-  // Player
-  ctx.fillStyle = player.color;
-  ctx.fillRect(player.x, player.y, player.size, player.size);
 
   // Coins
   for (let coin of coins) {
@@ -161,9 +171,11 @@ function draw() {
     }
   }
 
-  // Enemy
-  ctx.fillStyle = enemy.color;
-  ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
+  // player
+  ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+
+  // enemy
+  ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
 
   // HUD
   ctx.fillStyle = "white";
@@ -189,6 +201,7 @@ function draw() {
   }
 }
 
+// Game loop
 function gameLoop() {
   bgm.play();
 
@@ -201,6 +214,7 @@ function gameLoop() {
   }
 }
 
+// Start game
 function startGame() {
   bgm.play();
 
@@ -227,6 +241,7 @@ function startGame() {
   gameLoop();
 }
 
+// End game
 function endGame() {
   gameOver = true;
   clearInterval(timerInterval);
@@ -241,4 +256,5 @@ function endGame() {
 
 restartBtn.addEventListener("click", startGame);
 
+// run
 startGame();
