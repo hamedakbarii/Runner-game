@@ -172,10 +172,22 @@ function draw() {
   }
 
   // player
-  ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+  ctx.drawImage(
+    playerImg,
+    player.x,
+    player.y,
+    player.width * 1.5,
+    player.height * 1.5
+  );
 
   // enemy
-  ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
+  ctx.drawImage(
+    enemyImg,
+    enemy.x,
+    enemy.y,
+    enemy.width * 1.5,
+    enemy.height * 1.5
+  );
 
   // HUD
   ctx.fillStyle = "white";

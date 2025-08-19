@@ -8,9 +8,12 @@
   </head>
   <body>
     <div class="game-container">
-      <h1 id="title">Runner Game</h1>
+      <div class="gameHeader">
+        <h1 id="title">Runner Game</h1>
+        <button id="restartBtn" style="display: none">Restart</button>
+      </div>
+
       <canvas id="gameCanvas" width="800" height="600"></canvas>
-      <button id="restartBtn" style="display: none">Restart</button>
 
       <div id="controls">
         <button id="up">⬆️</button>
@@ -22,8 +25,8 @@
       </div>
     </div>
 
-    <a href="https://hamedakbri.ir">
-      <h3 class="footer">Made with ❤️ by <span>Hamed Akbari</span></h3>
+    <a href="https://hamedakbri.ir" class="footer">
+      <h3>Made with ❤️ by <span>Hamed Akbari</span></h3>
     </a>
 
     <script src="game.js"></script>
