@@ -1,30 +1,32 @@
-// sounds
+// Sounds
 const coinSound = new Audio("sounds/coin.mp3");
 const hitSound = new Audio("sounds/hit.mp3");
 const bgm = new Audio("sounds/bgm.mp3");
 bgm.loop = true;
 
+// Canvas setup
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-
 const restartBtn = document.getElementById("restartBtn");
 
+// Game variables
 let keys = {};
 let score = 0;
 let gameOver = false;
 let timeLeft = 30;
 let timerInterval;
 let highScore = localStorage.getItem("highScore") || 0;
+let countdown = 0; // شمارش معکوس قبل از شروع بازی
 
-// Game Dimensions
+// 📏 Game Dimensions
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 
-// Characters
-const player = { x: 50, y: 50, width: 40, height: 40, speed: 4 };
-const enemy = { x: 700, y: 100, width: 40, height: 40, speed: 2 };
+// 🟢 Player & 🔴 Enemy
+const player = { x: 50, y: 50, size: 30, width: 50, height: 50, speed: 4 };
+const enemy = { x: 700, y: 100, size: 30, width: 50, height: 50, speed: 2 };
 
-// Coins
+// 🟡 Coins
 const coins = [];
 function spawnCoins(n) {
   coins.length = 0;
@@ -33,7 +35,6 @@ function spawnCoins(n) {
       x: Math.random() * (GAME_WIDTH - 50) + 25,
       y: Math.random() * (GAME_HEIGHT - 50) + 25,
       size: 15,
-      color: "gold",
       collected: false,
     });
   }
@@ -44,7 +45,7 @@ spawnCoins(5);
 document.addEventListener("keydown", (e) => (keys[e.key] = true));
 document.addEventListener("keyup", (e) => (keys[e.key] = false));
 
-// Touch controls
+// 📱 Touch controls
 ["up", "down", "left", "right"].forEach((dir) => {
   document
     .getElementById(dir)
@@ -60,7 +61,7 @@ document.addEventListener("keyup", (e) => (keys[e.key] = false));
     );
 });
 
-// Gyro controls
+// 📱 Gyro controls
 window.addEventListener("deviceorientation", (e) => {
   keys["ArrowRight"] = e.gamma > 10;
   keys["ArrowLeft"] = e.gamma < -10;
@@ -68,9 +69,9 @@ window.addEventListener("deviceorientation", (e) => {
   keys["ArrowUp"] = e.beta < -10;
 });
 
-// Update game logic
+// Update
 function update() {
-  // Move player
+  // حرکت بازیکن
   if (keys["ArrowUp"]) player.y -= player.speed;
   if (keys["ArrowDown"]) player.y += player.speed;
   if (keys["ArrowLeft"]) player.x -= player.speed;
@@ -79,51 +80,46 @@ function update() {
   player.x = Math.max(0, Math.min(GAME_WIDTH - player.width, player.x));
   player.y = Math.max(0, Math.min(GAME_HEIGHT - player.height, player.y));
 
-  // Enemy follows player
+  // تعقیب دشمن
   const dx = player.x - enemy.x;
   const dy = player.y - enemy.y;
   const dist = Math.hypot(dx, dy);
   enemy.x += (dx / dist) * enemy.speed;
   enemy.y += (dy / dist) * enemy.speed;
 
-  // Coin collection
-  function playCoinSound() {
-    const sound = coinSound.cloneNode();
-    sound.play();
-  }
-
+  // جمع کردن سکه
   for (let coin of coins) {
     if (!coin.collected && isColliding(player, coin)) {
       coin.collected = true;
       score += 10;
-      playCoinSound();
+      const sound = coinSound.cloneNode();
+      sound.play();
       coins.push({
         x: Math.random() * (GAME_WIDTH - 50) + 25,
         y: Math.random() * (GAME_HEIGHT - 50) + 25,
         size: 15,
-        color: "gold",
         collected: false,
       });
     }
   }
 
-  // Collision with enemy
+  // برخورد با دشمن
   if (isColliding(player, enemy)) {
     endGame();
   }
 }
 
-// Collision detection
+// Collision check
 function isColliding(a, b) {
-  const aW = a.width || a.size;
-  const aH = a.height || a.size;
-  const bW = b.width || b.size;
-  const bH = b.height || b.size;
-
-  return a.x < b.x + bW && a.x + aW > b.x && a.y < b.y + bH && a.y + aH > b.y;
+  return (
+    a.x < b.x + b.size &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.size &&
+    a.y + a.height > b.y
+  );
 }
 
-// stars background
+// Stars background
 const stars = Array.from({ length: 100 }, () => ({
   x: Math.random() * GAME_WIDTH,
   y: Math.random() * GAME_HEIGHT,
@@ -149,14 +145,13 @@ function drawBackground() {
   });
 }
 
-// Images
+// Characters
 const playerImg = new Image();
 playerImg.src = "./images/player.png";
-
 const enemyImg = new Image();
 enemyImg.src = "./images/enemy.png";
 
-// Draw everything
+// Draw
 function draw() {
   ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
   drawBackground();
@@ -164,30 +159,16 @@ function draw() {
   // Coins
   for (let coin of coins) {
     if (!coin.collected) {
-      ctx.fillStyle = coin.color;
+      ctx.fillStyle = "gold";
       ctx.beginPath();
       ctx.arc(coin.x, coin.y, coin.size / 2, 0, Math.PI * 2);
       ctx.fill();
     }
   }
 
-  // player
-  ctx.drawImage(
-    playerImg,
-    player.x,
-    player.y,
-    player.width * 1.5,
-    player.height * 1.5
-  );
-
-  // enemy
-  ctx.drawImage(
-    enemyImg,
-    enemy.x,
-    enemy.y,
-    enemy.width * 1.5,
-    enemy.height * 1.5
-  );
+  // Player & Enemy
+  ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
+  ctx.drawImage(enemyImg, enemy.x, enemy.y, enemy.width, enemy.height);
 
   // HUD
   ctx.fillStyle = "white";
@@ -215,8 +196,6 @@ function draw() {
 
 // Game loop
 function gameLoop() {
-  bgm.play();
-
   if (!gameOver) {
     update();
     draw();
@@ -226,10 +205,8 @@ function gameLoop() {
   }
 }
 
-// Start game
+// Start game (with countdown)
 function startGame() {
-  bgm.play();
-
   score = 0;
   timeLeft = 30;
   gameOver = false;
@@ -240,17 +217,37 @@ function startGame() {
   enemy.y = 100;
   restartBtn.style.display = "none";
 
-  bgm.currentTime = 0;
+  countdown = 3; // start countdown
 
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) {
-      endGame();
+  const countdownInterval = setInterval(() => {
+    draw();
+    ctx.fillStyle = "white";
+    ctx.font = "60px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      countdown > 0 ? countdown : "Go!",
+      GAME_WIDTH / 2,
+      GAME_HEIGHT / 2
+    );
+
+    if (countdown === 0) {
+      clearInterval(countdownInterval);
+
+      bgm.currentTime = 0;
+      bgm.play();
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+
+      gameLoop();
     }
+    countdown--;
   }, 1000);
-
-  gameLoop();
 }
 
 // End game
@@ -268,5 +265,5 @@ function endGame() {
 
 restartBtn.addEventListener("click", startGame);
 
-// run
+// Start first game
 startGame();
