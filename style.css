@@ -63,7 +63,7 @@ canvas {
   color: white;
 }
 
-#controls {
+/* #controls {
   width: 100%;
   position: fixed;
   bottom: 20px;
@@ -90,25 +90,26 @@ canvas {
 
 #controls {
   display: none;
-}
-
-@media (max-width: 768px) {
-  #controls {
-    display: flex;
-  }
-}
+} */
 
 /* JoyStick Styles */
 #joystick-container {
+  opacity: 0;
+  display: flex;
   width: 120px;
   height: 120px;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  display: flex;
   justify-content: center;
   align-items: center;
   touch-action: none;
   z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  #joystick-container {
+    opacity: 1;
+  }
 }
 
 #joystick {
