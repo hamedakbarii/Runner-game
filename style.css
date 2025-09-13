@@ -28,6 +28,14 @@ canvas {
   }
 }
 
+.game-container {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .gameHeader {
   display: flex;
   flex-direction: column;
@@ -92,9 +100,6 @@ canvas {
 
 /* JoyStick Styles */
 #joystick-container {
-  position: fixed;
-  bottom: 30px;
-  left: 30px;
   width: 120px;
   height: 120px;
   background: rgba(255, 255, 255, 0.15);
