@@ -46,20 +46,53 @@ document.addEventListener("keydown", (e) => (keys[e.key] = true));
 document.addEventListener("keyup", (e) => (keys[e.key] = false));
 
 // 📱 Touch controls
-["up", "down", "left", "right"].forEach((dir) => {
-  document
-    .getElementById(dir)
-    .addEventListener(
-      "touchstart",
-      () => (keys[`Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`] = true)
-    );
-  document
-    .getElementById(dir)
-    .addEventListener(
-      "touchend",
-      () => (keys[`Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`] = false)
-    );
+const joystickContainer = document.getElementById("joystick-container");
+const joystick = document.getElementById("joystick");
+
+let centerX = joystickContainer.offsetLeft + joystickContainer.offsetWidth / 2;
+let centerY = joystickContainer.offsetTop + joystickContainer.offsetHeight / 2;
+
+joystickContainer.addEventListener("touchmove", (e) => {
+  let touch = e.touches[0];
+  let dx = touch.clientX - centerX;
+  let dy = touch.clientY - centerY;
+
+  let angle = Math.atan2(dy, dx);
+  let distance = Math.min(Math.hypot(dx, dy), 40);
+
+  joystick.style.transform = `translate(${Math.cos(angle) * distance}px, ${
+    Math.sin(angle) * distance
+  }px)`;
+
+  keys["ArrowUp"] = dy < -20;
+  keys["ArrowDown"] = dy > 20;
+  keys["ArrowLeft"] = dx < -20;
+  keys["ArrowRight"] = dx > 20;
 });
+
+joystickContainer.addEventListener("touchend", () => {
+  joystick.style.transform = "translate(0,0)";
+  keys["ArrowUp"] =
+    keys["ArrowDown"] =
+    keys["ArrowLeft"] =
+    keys["ArrowRight"] =
+      false;
+});
+
+// ["up", "down", "left", "right"].forEach((dir) => {
+//   document
+//     .getElementById(dir)
+//     .addEventListener(
+//       "touchstart",
+//       () => (keys[`Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`] = true)
+//     );
+//   document
+//     .getElementById(dir)
+//     .addEventListener(
+//       "touchend",
+//       () => (keys[`Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`] = false)
+//     );
+// });
 
 // 📱 Gyro controls
 window.addEventListener("deviceorientation", (e) => {
@@ -71,7 +104,7 @@ window.addEventListener("deviceorientation", (e) => {
 
 // Update
 function update() {
-  // حرکت بازیکن
+  // player move
   if (keys["ArrowUp"]) player.y -= player.speed;
   if (keys["ArrowDown"]) player.y += player.speed;
   if (keys["ArrowLeft"]) player.x -= player.speed;
@@ -80,14 +113,14 @@ function update() {
   player.x = Math.max(0, Math.min(GAME_WIDTH - player.width, player.x));
   player.y = Math.max(0, Math.min(GAME_HEIGHT - player.height, player.y));
 
-  // تعقیب دشمن
+  // chase enemy
   const dx = player.x - enemy.x;
   const dy = player.y - enemy.y;
   const dist = Math.hypot(dx, dy);
   enemy.x += (dx / dist) * enemy.speed;
   enemy.y += (dy / dist) * enemy.speed;
 
-  // جمع کردن سکه
+  // collect coins
   for (let coin of coins) {
     if (!coin.collected && isColliding(player, coin)) {
       coin.collected = true;
@@ -103,7 +136,7 @@ function update() {
     }
   }
 
-  // برخورد با دشمن
+  // colliding with enemy
   if (isColliding(player, enemy)) {
     endGame();
   }
